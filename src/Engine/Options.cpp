@@ -439,7 +439,7 @@ void create()
 	_info.push_back(OptionInfo("keyAIList", &keyAIList, SDLK_c, "STR_keyAIList", "STR_OXCE"));
 
 	// Map Editor
-	_info.push_back(OptionInfo("mapEditorShowOutOfPlaneNodes", &mapEditorShowOutOfPlaneNodes, true, "STR_SHOW_OUT_OF_PLANE_NODES", "STR_MAPEDITOR"));
+	_info.push_back(OptionInfo("mapEditorShowOutOfPlaneNodes", &mapEditorShowOutOfPlaneNodes, false, "STR_SHOW_OUT_OF_PLANE_NODES", "STR_MAPEDITOR"));
 	_info.push_back(OptionInfo("mapEditorShowOutOfPlaneNodeLinks", &mapEditorShowOutOfPlaneNodeLinks, true, "STR_SHOW_OUT_OF_PLANE_NODE_LINKS", "STR_MAPEDITOR"));
 	_info.push_back(OptionInfo("mapEditorDottedOutOfPlaneNodeLinks", &mapEditorDottedOutOfPlaneNodeLinks, true, "STR_DOTTED_OUT_OF_PLANE_NODE_LINKS", "STR_MAPEDITOR"));
 	_info.push_back(OptionInfo("mapEditorShowLinksOnlyForSelectedNodes", &mapEditorShowLinksOnlyForSelectedNodes, false, "STR_SHOW_LINKS_ONLY_FOR_SELECTED_NODES", "STR_MAPEDITOR"));
