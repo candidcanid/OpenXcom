@@ -120,7 +120,6 @@ public:
 	/// Is ALT pressed?
 	bool isAltPressed(bool considerTouchButtons = false) const;
 	/// Is SHIFT pressed?
-<<<<<<< HEAD
 	bool isShiftPressed(bool considerTouchButtons = false) const;
 
 	/// Is LMB pressed?
@@ -167,7 +166,6 @@ public:
 	void setMapEditor(MapEditor *mapEditor);
 	/// Gets the map editor for the game
 	MapEditor *getMapEditor();
-
 	/// Gets the geoScapeState
 	GeoscapeState *getGeoscapeState() const;
 };
