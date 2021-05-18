@@ -57,6 +57,7 @@ protected:
 	RuleInterface *_ruleInterface;
 	RuleInterface *_ruleInterfaceParent;
 	const Sound* _customSound;
+	std::string _fileName;
 
 	SDL_Color _palette[256];
 	Uint8 _cursorColor;
@@ -129,6 +130,11 @@ public:
 	virtual void resize(int &dX, int &dY);
 	/// Re-orients all the surfaces in the state.
 	virtual void recenter(int dX, int dY);
+
+	/// Sets a file name for access by a parent state of the file browser
+	void setFileName(std::string fileName);
+	/// Gets the file name set by the browser
+	std::string getFileName();
 };
 
 }
