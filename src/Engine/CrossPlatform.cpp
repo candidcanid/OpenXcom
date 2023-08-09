@@ -1388,7 +1388,7 @@ std::string now()
 	time(&rawtime);
 	timeinfo = localtime(&rawtime);
 	strftime(buffer, MAX_LEN, "%d-%m-%Y_%H-%M-%S", timeinfo);
-	sprintf(result, "%s", buffer);
+	snprintf(result, MAX_LEN, "%s", buffer);
 #endif
 	return result;
 }

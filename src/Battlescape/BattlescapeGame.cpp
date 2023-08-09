@@ -410,7 +410,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 		{
 			statePushBack(new UnitWalkBState(this, action));
 		}
-		else 
+		else
 		{
 			// impossible to walk to this tile, don't try to pick up an item from there for the rest of the turn
 			if (walkToItem)
@@ -494,7 +494,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 		{
 			_save->setSelectedUnit(getNextUnitToSelect());
 		}
-		else 
+		else
 			_save->selectNextPlayerUnit(true);
 		if (_save->getSelectedUnit())
 		{
@@ -2616,7 +2616,7 @@ bool BattlescapeGame::findItem(BattleAction *action, bool pickUpWeaponsMoreActiv
 					Log(LOG_INFO) << "Reached position of " << targetItem->getRules()->getName() << " I want to pick up: " << targetItem->getTile()->getPosition();
 				// Xilmi: Check if the item is a weapon while we have a weapon. If that't the case, we need to drop ours first. The only way this should happen is if our weapon is out of ammo.
 				BattleItem *mainHand = action->actor->getMainHandWeapon(true, false);
-				if (targetItem->haveAnyAmmo() && mainHand != NULL || (mainHand != NULL && !mainHand->canBeUsedInCurrentEnvironment(getDepth())))
+				if ((targetItem->haveAnyAmmo() && mainHand != NULL) || (mainHand != NULL && !mainHand->canBeUsedInCurrentEnvironment(getDepth())))
 				{
 					if (Options::traceAI)
 						Log(LOG_INFO) << targetItem->getRules()->getName() << " has ammo but my " << action->actor->getMainHandWeapon(true, false)->getRules()->getName() << " doesn't. So I drop mine before picking up the other.";
