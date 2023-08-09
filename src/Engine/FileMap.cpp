@@ -36,6 +36,7 @@
  * A. somename.zip is always scanned before somename/ directory.
  */
 
+#include <stack>
 #include <string>
 #include <sstream>
 #include <istream>
@@ -322,10 +323,14 @@ static bool sanitizeZipEntryName(std::string& zefname) {
 	return true;
 }
 static std::string hexDumpBogusData(const std::string& bogus) {
-	std::vector<char> buf(bogus.size()*3 + 1, 0);
-	char *p = buf.data();
-	for (auto c : bogus) { p += sprintf(p, "%02hhx ", c); }
-	return std::string(buf.data());
+	std::string buf;
+	char stackbuf[32];
+	for (auto c : bogus)
+	{
+		snprintf(stackbuf, sizeof(stackbuf), "%02hhx ", c);
+		buf.append(stackbuf);
+	}
+	return buf;
 }
 /* recursively list a directory */
 typedef std::vector<std::pair<std::string, std::string>> dirlist_t; // <dirname, basename>

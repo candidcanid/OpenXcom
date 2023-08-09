@@ -1432,8 +1432,8 @@ bool TileEngine::calculateUnitsInFOV(BattleUnit* unit, const Position eventPos, 
 								bu->setVisible(true);
 							}
 							if ((bu->getFaction() == FACTION_HOSTILE && unit->getFaction() != FACTION_HOSTILE)
-								|| ( (bu->getFaction() != FACTION_HOSTILE && unit->getFaction() == FACTION_HOSTILE ))
-								&& !unit->hasVisibleUnit(bu))
+								|| (( (bu->getFaction() != FACTION_HOSTILE && unit->getFaction() == FACTION_HOSTILE ))
+								&& !unit->hasVisibleUnit(bu)))
 							{
 								unit->addToVisibleUnits(bu);
 								unit->addToVisibleTiles(bu->getTile());
@@ -6119,12 +6119,12 @@ bool TileEngine::isNextToDoor(Tile* tile, bool flipDoor)
 	Position neighbourSouth = tile->getPosition();
 	neighbourSouth += Position(0, 1, 0);
 	Tile* tileSouth = _save->getTile(neighbourSouth);
-	if (tileSouth != NULL && (tileSouth->isDoor(O_NORTHWALL) || tileSouth->isUfoDoor(O_NORTHWALL) && !flipDoor))
+	if (tileSouth != NULL && (tileSouth->isDoor(O_NORTHWALL) || (tileSouth->isUfoDoor(O_NORTHWALL) && !flipDoor)))
 		return true;
 	Position neighbourEast = tile->getPosition();
 	neighbourEast += Position(1, 0, 0);
 	Tile *tileEast = _save->getTile(neighbourEast);
-	if (tileEast != NULL && (tileEast->isDoor(O_WESTWALL) || tileEast->isUfoDoor(O_WESTWALL) && !flipDoor))
+	if (tileEast != NULL && (tileEast->isDoor(O_WESTWALL) || (tileEast->isUfoDoor(O_WESTWALL) && !flipDoor)))
 		return true;
 	return false;
 }
