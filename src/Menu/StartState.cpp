@@ -38,6 +38,12 @@
 #include <SDL_mixer.h>
 #include <SDL_thread.h>
 
+#if defined(__APPLE__)
+
+#include "../Engine/MacOS.h"
+
+#endif
+
 namespace OpenXcom
 {
 
@@ -112,7 +118,11 @@ StartState::StartState() : _anim(0)
 	{
 		if (Options::oxceStartUpTextMode < 2)
 		{
-			addLine(CrossPlatform::getDosPath() + ">openxcom");
+			#if defined(__APPLE__)
+				addLine("Running: " + MacOS::getBundlePath());
+			#else
+				addLine(CrossPlatform::getDosPath() + ">openxcom");
+			#endif
 		}
 	}
 }
@@ -241,15 +251,19 @@ void StartState::animate()
 			case 1:
 				if (Options::oxceStartUpTextMode < 1)
 				{
-					addLine("DOS/4GW Protected Mode Run-time  Version 1.9");
-					addLine("Copyright (c) Rational Systems, Inc. 1990-1993");
+					#if !defined(__APPLE__)
+						addLine("DOS/4GW Protected Mode Run-time  Version 1.9");
+						addLine("Copyright (c) Rational Systems, Inc. 1990-1993");
+					#endif
 				}
 				break;
 			case 6:
 				if (Options::oxceStartUpTextMode < 2)
 				{
-					addLine("");
-					addLine("OpenXcom initialisation");
+					#if !defined(__APPLE__)
+						addLine("");
+						addLine("OpenXcom initialisation");
+					#endif
 				}
 				break;
 			case 7:
@@ -262,12 +276,14 @@ void StartState::animate()
 					}
 					else
 					{
-						addLine("SoundBlaster Sound Effects");
-						if (Options::preferredMusic == MUSIC_MIDI)
-							addLine("General MIDI Music");
-						else
-							addLine("SoundBlaster Music");
-						addLine("Base Port 220  Irq 7  Dma 1");
+						#if !defined(__APPLE__)
+							addLine("SoundBlaster Sound Effects");
+							if (Options::preferredMusic == MUSIC_MIDI)
+								addLine("Preferred Music is Music MIDI");
+							else
+								addLine("Preferred Music ");
+							addLine("Base Port 220  Irq 7  Dma 1");
+						#endif
 					}
 				}
 				if (Options::oxceStartUpTextMode < 2)

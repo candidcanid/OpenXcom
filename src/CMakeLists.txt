@@ -169,6 +169,7 @@ set ( engine_src
   Engine/Timer.cpp
   Engine/Unicode.cpp
   Engine/Zoom.cpp
+  Engine/MacOS.cpp
 )
 
 set ( geoscape_src

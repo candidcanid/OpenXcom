@@ -27,6 +27,7 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <vector>
 #include <yaml-cpp/yaml.h>
 #include "Exception.h"
 #include "Logger.h"
@@ -964,6 +965,9 @@ void expendLoadLastSave()
 void setFolders()
 {
 	_dataList = CrossPlatform::findDataFolders();
+	for(std::vector<std::string>::const_iterator s = _dataList.begin(); s != _dataList.end(); s++)
+		Log(LOG_VERBOSE) << "(dataFolder): " << *s;
+
 	if (!_dataFolder.empty())
 	{
 		_dataList.insert(_dataList.begin(), _dataFolder);
@@ -972,6 +976,8 @@ void setFolders()
 	if (_userFolder.empty())
 	{
 		std::vector<std::string> user = CrossPlatform::findUserFolders();
+		for(std::vector<std::string>::const_iterator s = user.begin(); s != user.end(); s++)
+			Log(LOG_VERBOSE) << "(userFolder): " << *s;
 
 		if (_configFolder.empty())
 		{
