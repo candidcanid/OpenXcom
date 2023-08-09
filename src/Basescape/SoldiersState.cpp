@@ -68,7 +68,7 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 	_window = new Window(this, 320, 200, 0, 0);
 	_btnOk = new TextButton(64, 16, 248, 176);
 	_cbxScreenActions = new ComboBox(this, 128, 16, 8, 176, true);
-	_cbxFilterByCraft = new ComboBox(this, 96, 16, 144, 176, true);	
+	_cbxFilterByCraft = new ComboBox(this, 96, 16, 144, 176, true);
 	_txtTitle = new Text(168, 17, 16, 8);
 	_cbxSortBy = new ComboBox(this, 120, 16, 192, 8, false);
 	_txtName = new Text(114, 9, 16, 32);
@@ -86,9 +86,9 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 	add(_txtRank, "text2", "soldierList");
 	add(_txtCraft, "text2", "soldierList");
 	add(_lstSoldiers, "list", "soldierList");
-	add(_cbxSortBy, "button", "soldierList");	
+	add(_cbxSortBy, "button", "soldierList");
 	add(_cbxScreenActions, "button", "soldierList");
-	add(_cbxFilterByCraft, "button", "soldierList");	
+	add(_cbxFilterByCraft, "button", "soldierList");
 
 	centerAllSurfaces();
 
@@ -146,7 +146,7 @@ SoldiersState::SoldiersState(Base *base) : _base(base), _origSoldierOrder(*_base
 	}
 	_cbxFilterByCraft->setOptions(_craftOptions, true);
 	_cbxFilterByCraft->setSelected(0);
-	_cbxFilterByCraft->onChange((ActionHandler)&SoldiersState::cbxFilterCraftByChange);	
+	_cbxFilterByCraft->onChange((ActionHandler)&SoldiersState::cbxFilterCraftByChange);
 
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_LEFT);
@@ -365,16 +365,16 @@ void SoldiersState::initList(size_t scrl)
 				_baseIndexSoldiers.push_back(i);
 			}else if(selectedCraftIndex == 1){
 				if (soldier->getCraft() == 0){
-					_filteredListOfSoldiers.push_back(soldier);	
-					_baseIndexSoldiers.push_back(i);									
-				}	
+					_filteredListOfSoldiers.push_back(soldier);
+					_baseIndexSoldiers.push_back(i);
+				}
 			}else{
 				if (soldier->getCraft() == _base->getCrafts()->at(selectedCraftIndex-2))
 				{
 					_filteredListOfSoldiers.push_back(soldier);
 					_baseIndexSoldiers.push_back(i);
 				}
-			
+
 			}
 		}
 	}
@@ -387,21 +387,21 @@ void SoldiersState::initList(size_t scrl)
 		RuleSoldierTransformation *transformationRule = _game->getMod()->getSoldierTransformation(selAction);
 		if (transformationRule)
 		{
-			for(size_t i=0; i< _base->getSoldiers()->size();++i)			
+			for(size_t i=0; i< _base->getSoldiers()->size();++i)
 			{
 				Soldier* soldier=_base->getSoldiers()->at(i);
-				if ((soldier->getCraft() && soldier->getCraft()->getStatus() == "STR_OUT") || 
-                  
+				if ((soldier->getCraft() && soldier->getCraft()->getStatus() == "STR_OUT") ||
+
 				    ((selectedCraftIndex  > 1) && soldier->getCraft() != _base->getCrafts()->at(selectedCraftIndex-2)) ||
-					
-					(selectedCraftIndex == 1 )  && soldier->getCraft())
+
+					((selectedCraftIndex == 1 )  && soldier->getCraft()))
 				{
 					// soldiers outside of the base are not eligible
 					continue;
 				}
 				if (soldier->isEligibleForTransformation(transformationRule))
 				{
-					_filteredListOfSoldiers.push_back(soldier);		
+					_filteredListOfSoldiers.push_back(soldier);
 				}
 			}
 			for (auto* deadMan : *_game->getSavedGame()->getDeadSoldiers())
@@ -630,10 +630,10 @@ void SoldiersState::cbxFilterCraftByChange(Action *action){
 	if (selIdx == (size_t)-1)
 	{
 		return;
-	}	
-	selectedCraftIndex = selIdx; 
+	}
+	selectedCraftIndex = selIdx;
 	initList(0);
-}	
+}
 
 /**
 * Displays the inventory screen for the soldiers inside the base.

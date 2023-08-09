@@ -48,8 +48,8 @@ namespace OpenXcom
  */
 AIModule::AIModule(SavedBattleGame *save, BattleUnit *unit, Node *node) :
 	_save(save), _unit(unit), _aggroTarget(0), _knownEnemies(0), _visibleEnemies(0), _spottingEnemies(0),
-    _escapeTUs(0), _ambushTUs(0), _weaponPickedUp(false), _wantToEndTurn(false), _rifle(false), _melee(false), _blaster(false), _grenade(false), _ranOutOfTUs(false),
-	_didPsi(false), _AIMode(AI_PATROL), _closestDist(100), _fromNode(node), _toNode(0), _foundBaseModuleToDestroy(false)
+    _escapeTUs(0), _ambushTUs(0), _weaponPickedUp(false), _wantToEndTurn(false), _rifle(false), _melee(false), _blaster(false), _grenade(false), _didPsi(false),
+	_ranOutOfTUs(false), _AIMode(AI_PATROL), _closestDist(100), _fromNode(node), _toNode(0), _foundBaseModuleToDestroy(false)
 {
 	_traceAI = Options::traceAI;
 
@@ -3170,17 +3170,25 @@ void AIModule::brutalThink(BattleAction* action)
 			{
 				action->run = _attackAction.run;
 				_reposition = true;
-				if (_traceAI)
-					Log(LOG_INFO) << "Should reposition to " << action->target
-									  << " in order to then attack with " << action->weapon->getRules()->getName();
+				if (_traceAI) {
+					Log(LOG_INFO)
+						<< "Should reposition to "
+						<< action->target
+				  		<< " in order to then attack with "
+				  		<< action->weapon->getRules()->getName();
+				}
 			}
 			else
 				_reposition = false;
 			if (_traceAI)
 			{
-				if (action->type != BA_WALK)
-					Log(LOG_INFO) << "Should attack " << action->target
-							  << " with " << action->weapon->getRules()->getName();
+				if (action->type != BA_WALK) {
+					Log(LOG_INFO)
+						<< "Should attack "
+						<< action->target
+					  	<< " with "
+					  	<< action->weapon->getRules()->getName();
+				}
 			}
 			if (action->type == BA_LAUNCH)
 			{
@@ -3916,7 +3924,7 @@ void AIModule::brutalThink(BattleAction* action)
 		tryToPickUpGrenade(_unit->getTile(), action);
 		action->target = myPos;
 	}
-	
+
 	if (_traceAI)
 	{
 		Log(LOG_INFO) << "Brutal-AI final goto-position from "
@@ -4052,7 +4060,7 @@ void AIModule::brutalThink(BattleAction* action)
 					Log(LOG_INFO) << "Want to turn towards " << action->target << " encircleTile: " << encircleTile->getPosition();
 				Log(LOG_INFO) << "Want to turn towards " << action->target << " iHaveLof: " << iHaveLof << " winnerWasSpecialDoorCase: " << winnerWasSpecialDoorCase;
 			}
-				
+
 		}
 		else
 		{
@@ -4440,7 +4448,7 @@ bool AIModule::isPathToPositionSave(Position target, bool &saveForProxies)
 					else if (targetNode->getPrevNode())
 					{
 						Tile *prevTile = _save->getTile(targetNode->getPrevNode()->getPosition());
-						if (!_unit->isCheatOnMovement() || unit->hasVisibleTile(prevTile) && unit->getReactionScore() > (double)_unit->getBaseStats()->reactions * ((double)(_unit->getTimeUnits() - (double)targetNode->getPrevNode()->getTUCost(false).time) / (_unit->getBaseStats()->tu)))
+						if (!_unit->isCheatOnMovement() || (unit->hasVisibleTile(prevTile) && unit->getReactionScore() > (double)_unit->getBaseStats()->reactions * ((double)(_unit->getTimeUnits() - (double)targetNode->getPrevNode()->getTUCost(false).time) / (_unit->getBaseStats()->tu))))
 							return false;
 					}
 				}
@@ -4476,8 +4484,8 @@ bool AIModule::brutalPsiAction()
 		}
 		if (cost[j].Time > 0)
 		{
-			cost[j].Time;
-			cost[j].Energy;
+			// cost[j].Time;
+			// cost[j].Energy;
 			have |= cost[j].haveTU();
 		}
 	}
@@ -5313,7 +5321,7 @@ void AIModule::brutalBlaster()
 				targetNode = targetNode->getPrevNode();
 			}
 			_attackAction.target = _attackAction.waypoints.front();
-			if (_attackAction.waypoints.size() > maxWaypoints)
+			if (static_cast<int>(_attackAction.waypoints.size()) > maxWaypoints)
 				_attackAction.type = BA_RETHINK;
 			else if (blindMode)
 				_aggroTarget->setTileLastSpotted(-1, _unit->getFaction(), true);
@@ -5941,7 +5949,7 @@ float AIModule::getItemPickUpScore(BattleItem* item)
 			return 10;
 		if (item->getRules()->getBattleType() == BT_GRENADE || item->getRules()->getBattleType() == BT_MELEE)
 			return 5;
-	} 
+	}
 	if (item->getRules()->getBattleType() == BT_AMMO)
 	{
 		for (const auto *bi : *_unit->getInventory())
@@ -6339,8 +6347,9 @@ bool AIModule::wantToRun()
 		return false;
 	if (_unit->getTimeUnits() > 0 && (float) _unit->getEnergy() / _unit->getTimeUnits() > (float)_unit->getArmor()->getMoveCostRun().EnergyPercent / _unit->getArmor()->getMoveCostRun().TimePercent)
 	{
-		if (_traceAI)
+		if (_traceAI) {
 			Log(LOG_INFO) << "Wants to run since energy is decent: " << (float)_unit->getEnergy() / _unit->getTimeUnits() << " / " << (float)_unit->getArmor()->getMoveCostRun().EnergyPercent / _unit->getArmor()->getMoveCostRun().TimePercent;
+		}
 		return true;
 	}
 	return false;
