@@ -21,8 +21,7 @@
 #include <sstream>
 #include <cfloat>
 
-#include "../Engine/Logger.h"
-#include "../Engine/CrossPlatform.h"
+#include "../assertions.h"
 
 namespace OpenXcom
 {
@@ -57,16 +56,9 @@ int unserializeInt(Uint8 **buffer, Uint8 sizeKey)
 		break;
 	}
 	default:
-	{
-		// XXX: if this unreachable block gets hit, check to see
+		// if this unreachable block gets hit, check to see
 		//   that sizeKey is being properly initialized
-		#ifdef NDEBUG
-			Log(LOG_WARNING) << "unserializeInt has invalid sizeKey of " << sizeKey
-				<< " .. this can mean deserialization data is ill-formed";
-		#else
-			CrossPlatform::unreachable();
-		#endif
-	}
+		UNREACHABLE();
 	}
 
 	*buffer += sizeKey;
@@ -104,16 +96,9 @@ void serializeInt(Uint8 **buffer, Uint8 sizeKey, int value)
 		break;
 	}
 	default:
-	{
-		// XXX: if this unreachable block gets hit, check to see
+		// if this unreachable block gets hit, check to see
 		//   that sizeKey is being properly initialized
-		#ifdef NDEBUG
-			Log(LOG_WARNING) << "serializeInt has invalid sizeKey of " << sizeKey
-				<< " .. this can mean serialization data is ill-formed";
-		#else
-			CrossPlatform::unreachable();
-		#endif
-	}
+		UNREACHABLE();
 	}
 
 	*buffer += sizeKey;

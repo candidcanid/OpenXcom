@@ -60,6 +60,9 @@ public:
 	static const int PAPERDOLL_X = 60;
 	static const int PAPERDOLL_Y = 65;
 
+	inline static const unsigned short GROUND_W = 320;
+	inline static const unsigned short GROUND_H = 200;
+
 	/// Name of class used in script.
 	static constexpr const char *ScriptName = "RuleInventory";
 	/// Register all useful function used by script.

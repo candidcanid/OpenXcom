@@ -762,6 +762,35 @@ void Surface::drawRect(SDL_Rect *rect, Uint8 color)
 }
 
 /**
+ * Draws a non-filled rectangle (i.e. an outline) on the surface.
+ * @param rect Pointer to Rect.
+ * @param color Color of the rectangle.
+ */
+void Surface::drawOutline(SDL_Rect *rect, Uint8 color)
+{
+	// line draw order
+	// (x,y+h-1) +--d--+ (x+w-1,y+h-1)
+	//           |     |
+	//           b ... c
+	//           |     |
+	//     (x,y) +--a--+ (x+w-1,y)
+	const Sint16 x = rect->x;
+	const Sint16 y = rect->y;
+	const Uint16 w = rect->w;
+	const Uint16 h = rect->h;
+	assert(w > 0 && h > 0);
+
+	// a
+	this->drawLine(x, y, x+w-1, y, color);
+	// b
+	this->drawLine(x, y, x, y+h-1, color);
+	// c
+	this->drawLine(x+w-1, y, x+w-1, y+h-1, color);
+	// d
+	this->drawLine(x, y+h-1, x+w-1, y+h-1, color);
+}
+
+/**
  * Draws a filled rectangle on the surface.
  * @param x X position in pixels.
  * @param y Y position in pixels.
