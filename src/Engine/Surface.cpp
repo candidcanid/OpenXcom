@@ -769,11 +769,11 @@ void Surface::drawRect(SDL_Rect *rect, Uint8 color)
 void Surface::drawOutline(SDL_Rect *rect, Uint8 color)
 {
 	// line draw order
-	// (x,y+h-1) +--d--+ (x+w-1,y+h-1)
+	//     (x,y) +--a--+ (x+w-1,y)
 	//           |     |
 	//           b ... c
 	//           |     |
-	//     (x,y) +--a--+ (x+w-1,y)
+	// (x,y+h-1) +--d--+ (x+w-1,y+h-1)
 	const Sint16 x = rect->x;
 	const Sint16 y = rect->y;
 	const Uint16 w = rect->w;
