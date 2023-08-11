@@ -66,33 +66,6 @@ private:
 	std::ostringstream os;
 };
 
-class NullStreamBuffer : public std::streambuf {
-    public:
-        virtual std::streamsize xsputn (const char * s, std::streamsize n) {
-            return n;
-        }
-        virtual int overflow (int c) {
-            return 1;
-        }
-};
-
-class NullStream : public std::ostream {
-    public:
-        NullStream() : std::ostream (&buf) {}
-    private:
-        NullStreamBuffer buf;
-};
-
-static NullStream null_stream;
-
-inline std::ostream& Log(SeverityLevel level) {
-	if (level > Logger::reportingLevel()) {
-		return null_stream;
-	} else {
-		return Logger().get(level);
-	}
-}
-
-// #define Log(level) if (level > Logger::reportingLevel()) { } else Logger().get(level)
+#define Log(level) if (level > Logger::reportingLevel()) { } else Logger().get(level)
 
 }
