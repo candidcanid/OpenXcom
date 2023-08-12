@@ -118,6 +118,8 @@ public:
 	void mouseOver(Action *action, State *state) override;
 	/// Special handling for mouse clicks.
 	void mouseClick(Action *action, State *state) override;
+	/// TODO: mouseAction desc
+	bool handleMouseAction(Action *action, State *state);
 	/// Unloads the selected weapon.
 	bool unload(bool quickUnload = false);
 	/// Checks whether the given item is visible with the current search string.

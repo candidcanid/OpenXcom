@@ -1,7 +1,7 @@
 #pragma once
 
 #if defined(__APPLE__)
-	#define __PLATFORM_DARWIN 1
+	#define __PLATFORM_TARGET_DARWIN 1
 #endif
 
 

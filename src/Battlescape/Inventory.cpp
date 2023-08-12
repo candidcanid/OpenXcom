@@ -43,6 +43,7 @@
 #include "../Ufopaedia/Ufopaedia.h"
 #include "../assertions.h"
 #include "PrimeGrenadeState.h"
+#include "SDL_mouse.h"
 #include "TileEngine.h"
 #include "WarningMessage.h"
 #include <algorithm>
@@ -767,12 +768,168 @@ void Inventory::mouseOver(Action *action, State *state) {
     InteractiveSurface::mouseOver(action, state);
 }
 
+// TODO: temp 'override', merge this into general behaviour later
+bool Inventory::handleMouseAction(Action *action, State *state) {
+    bool did_handle = false;
+    switch(action->getDetails()->button.button) {
+        case SDL_BUTTON_WHEELDOWN: {
+            did_handle = true;
+            if (_selUnit == nullptr)
+                break;
+            // Pickup item
+            if (_selItem == nullptr) {
+                int x = (int)floor(action->getAbsoluteXMouse()) - getX();
+                int y = (int)floor(action->getAbsoluteYMouse()) - getY();
+                RuleInventory *slot = getSlotInPosition(&x, &y);
+                if (slot != nullptr) {
+                    if (slot->getType() == INV_GROUND)
+                        x += _groundOffset;
+                    BattleItem *item = _selUnit->getItem(slot, x, y);
+                    if (item == nullptr || item->getRules()->isFixed())
+                        break;
+
+                    RuleInventory *newSlot = _inventorySlotGround;
+                    std::string warning = "STR_NOT_ENOUGH_SPACE";
+                    bool placed = false;
+
+                    if (slot->getType() == INV_GROUND) {
+                        switch (item->getRules()->getBattleType()) {
+                        case BT_FIREARM:
+                            newSlot = _inventorySlotRightHand;
+                            break;
+                        case BT_MINDPROBE:
+                        case BT_PSIAMP:
+                        case BT_MELEE:
+                        case BT_CORPSE:
+                            newSlot = _inventorySlotLeftHand;
+                            break;
+                        default:
+                            if (item->getRules()->getInventoryHeight() > 2) {
+                                newSlot = _inventorySlotBackPack;
+                            } else {
+                                newSlot = _inventorySlotBelt;
+                            }
+                            break;
+                        }
+                    }
+
+                    if (newSlot->getType() != INV_GROUND) {
+                        _stackLevel[item->getSlotX()][item->getSlotY()] -= 1;
+
+                        placed = fitItem(newSlot, item, warning);
+
+                        if (!placed) {
+                            for (const auto &wildCard : *_game->getMod()->getInventories()) {
+                                if (placed) {
+                                    break; // loop finished
+                                }
+                                newSlot = wildCard.second;
+                                if (newSlot->getType() == INV_GROUND) {
+                                    continue;
+                                }
+                                placed = fitItem(newSlot, item, warning);
+                            }
+                        }
+                        if (placed) {
+                            mouseOver(action, state);
+                        } else {
+                            _stackLevel[item->getSlotX()][item->getSlotY()] += 1;
+                            _warning->showMessage(_game->getLanguage()->getString(warning));
+                        }
+                    }
+                }
+            }
+            break;
+        }
+        case SDL_BUTTON_WHEELUP: {
+            did_handle = true;
+
+            if (_selUnit == nullptr)
+                break;
+            // drop item
+            if (_selItem == nullptr) {
+
+                int x = (int)floor(action->getAbsoluteXMouse()) - getX();
+                int y = (int)floor(action->getAbsoluteYMouse()) - getY();
+                RuleInventory *slot = getSlotInPosition(&x, &y);
+                if (slot == nullptr)
+                    break;
+
+                if (slot->getType() == INV_GROUND)
+                    x += _groundOffset;
+
+                BattleItem *item = _selUnit->getItem(slot, x, y);
+                if (item == nullptr)
+                    break;
+
+                if (_game->isAltPressed()) {
+                    bool quickUnload = false;
+                    bool allowed = true;
+                    // Quick-unload check
+                    if (!_tu) {
+                        // Outside of the battlescape, quick-unload:
+                        // - the weapon is never moved from its original slot
+                        // - the ammo always drops on the ground
+                        quickUnload = true;
+                    } else {
+                        if (item->getSlot()->getType() != INV_HAND) {
+                            // During the battle, only weapons held in hand can be shift-unloaded
+                            allowed = false;
+                        }
+                    }
+                    if (allowed) {
+                        _selItem = item; // don't worry, we'll unselect it later!
+                        if (unload(quickUnload)) {
+                            _game->getMod()->getSoundByDepth(_depth, Mod::ITEM_DROP)->play();
+                            mouseOver(action, state);
+                        }
+                        _selItem = nullptr; // see, I told you!
+                    }
+                } else {
+                    // default - drop item onto ground
+                    if(item->getRules()->isFixed())
+                        break;
+
+                    RuleInventory *newSlot = _inventorySlotGround;
+                    std::string warning = "STR_NOT_ENOUGH_SPACE";
+                    bool placed = false;
+                    if (!_tu || _selUnit->spendTimeUnits(item->getMoveToCost(newSlot))) {
+                        placed = true;
+                        moveItem(item, newSlot, 0, 0);
+                        _game->getMod()->getSoundByDepth(_depth, Mod::ITEM_DROP)->play();
+                        arrangeGround();
+                    } else {
+                        warning = "STR_NOT_ENOUGH_TIME_UNITS";
+                    }
+
+                    if (placed) {
+                        mouseOver(action, state);
+                    } else {
+                        _stackLevel[item->getSlotX()][item->getSlotY()] += 1;
+                        _warning->showMessage(_game->getLanguage()->getString(warning));
+                    }
+                }
+            }
+            break;
+        }
+    }
+
+    if(did_handle)
+        InteractiveSurface::mouseClick(action, state);
+
+    return did_handle;
+}
+
 /**
  * Picks up / drops an item.
  * @param action Pointer to an action.
  * @param state State that the action handlers belong to.
  */
 void Inventory::mouseClick(Action *action, State *state) {
+    if(handleMouseAction(action, state))
+        // don't do anything if new behaviour did something
+        return;
+
     if (_game->isLeftClick(action)) {
         if (_selUnit == 0)
             return;
@@ -879,9 +1036,8 @@ void Inventory::mouseClick(Action *action, State *state) {
                     }
                 }
             }
-        }
-        // Drop item
-        else {
+        } else {
+            // Drop item
             int x = _selection->getX() + (RuleInventory::HAND_W - _selItem->getRules()->getInventoryWidth()) * RuleInventory::SLOT_W / 2 + RuleInventory::SLOT_W / 2,
                 y = _selection->getY() + (RuleInventory::HAND_H - _selItem->getRules()->getInventoryHeight()) * RuleInventory::SLOT_H / 2 + RuleInventory::SLOT_H / 2;
             RuleInventory *slot = getSlotInPosition(&x, &y);
