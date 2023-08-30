@@ -21,6 +21,15 @@ if(CMAKE_GENERATOR)
 				-P "${_POSTPROCESS_BUNDLE_MODULE_LOCATION}"
 				VERBATIM
 		)
+		# codesigning is a requirement for apps for Apple Silicon/arm64 devices
+		#  so take the simplest road and self-sign with an ad-hoc signature
+		if ( APPLE AND CREATE_BUNDLE )
+			add_custom_command(TARGET ${target} POST_BUILD
+				COMMAND codesign --force  --deep -s - "${path}"
+				COMMENT "(macOS) signing \"${path}\" with an ad-hoc signature"
+				VERBATIM
+			)
+		endif()
 	endfunction()
 	return()
 endif()
@@ -44,6 +53,7 @@ function(message)
 		_message(${ARGV})
 	endif()
 endfunction()
+
 
 include(BundleUtilities)
 set(BU_CHMOD_BUNDLE_ITEMS ON)

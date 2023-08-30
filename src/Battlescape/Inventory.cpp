@@ -47,6 +47,7 @@
 #include "../Engine/Screen.h"
 #include "../Engine/CrossPlatform.h"
 #include "TileEngine.h"
+#include "../assertions.h"
 
 namespace OpenXcom
 {
@@ -67,6 +68,7 @@ Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base)
 
 	_depth = _game->getSavedGame()->getSavedBattle()->getDepth();
 	_grid = new Surface(width, height, 0, 0);
+	_grid_highlights = new Surface(width, height, 0, 0);
 	_items = new Surface(width, height, 0, 0);
 	_gridLabels = new Surface(width, height, 0, 0);
 	_selection = new Surface(RuleInventory::HAND_W * RuleInventory::SLOT_W, RuleInventory::HAND_H * RuleInventory::SLOT_H, x, y);
@@ -109,6 +111,8 @@ Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base)
 	_groundSlotsX = (Screen::ORIGINAL_WIDTH - _inventorySlotGround->getX()) / RuleInventory::SLOT_W;
 	_groundSlotsY = (Screen::ORIGINAL_HEIGHT - _inventorySlotGround->getY()) / RuleInventory::SLOT_H;
 	_occupiedSlotsCache.resize(_groundSlotsY, std::vector<char>(_groundSlotsX * 2, false));
+	// upper bound guess at how many highlights we could have .. SDL_Rect's are cheap
+	_active_highlights.reserve(32);
 }
 
 /**
@@ -117,6 +121,7 @@ Inventory::Inventory(Game *game, int width, int height, int x, int y, bool base)
 Inventory::~Inventory()
 {
 	delete _grid;
+	delete _grid_highlights;
 	delete _items;
 	delete _gridLabels;
 	delete _selection;
@@ -135,6 +140,7 @@ void Inventory::setPalette(const SDL_Color *colors, int firstcolor, int ncolors)
 {
 	Surface::setPalette(colors, firstcolor, ncolors);
 	_grid->setPalette(colors, firstcolor, ncolors);
+	_grid_highlights->setPalette(colors, firstcolor, ncolors);
 	_items->setPalette(colors, firstcolor, ncolors);
 	_gridLabels->setPalette(colors, firstcolor, ncolors);
 	_selection->setPalette(colors, firstcolor, ncolors);
@@ -177,6 +183,146 @@ void Inventory::setSelectedUnit(BattleUnit *unit, bool resetGroundOffset)
 }
 
 /**
+ * Draws inventory grid highlights
+ * TODO: more of a description
+ */
+void Inventory::drawGridHighlights() {
+	RuleInterface *rule = _game->getMod()->getInterface("inventory");
+	// repainting default color to remove any existing grid highlights
+	Uint8 color = rule->getElement("grid")->color;
+	for(SDL_Rect rect : _active_highlights) {
+		_grid_highlights->drawOutline(&rect, color);
+	}
+	_active_highlights.clear();
+
+	const int primary_highlight = rule->getElement("highlightPrimary")->color;
+	const int tag_highlight = rule->getElement("highlightTag")->color;
+	const int other_highlight = rule->getElement("highlightOther")->color;
+
+	const auto doItemHighlight = [&](const BattleItem *const item, const int color) {
+		Log(LOG_VERBOSE) << "(Inv) drawing grid highlights for active mouseOver item";
+		switch(item->getSlot()->getType()) {
+			case INV_GROUND: {
+				int x, y;
+				x = (item->getSlot()->getX() + (item->getSlotX() - _groundOffset) * RuleInventory::SLOT_W);
+				y = (item->getSlot()->getY() + item->getSlotY() * RuleInventory::SLOT_H);
+
+				// keep highlight constrained to the grid
+				Uint16 w = item->getRules()->getInventoryWidth() * RuleInventory::SLOT_W + 1;
+				Uint16 _capped_w = std::min(static_cast<Uint16>(x+w), RuleInventory::GROUND_W) - x;
+
+				Uint16 h = item->getRules()->getInventoryHeight() * RuleInventory::SLOT_H + 1;
+				Uint16 _capped_h = std::min(static_cast<Uint16>(y+h), RuleInventory::GROUND_H) - y;
+
+				Log(LOG_VERBOSE) <<
+					"(Inv) rect[" << x << "," << y << "," << x+w << "," << y+h << "]";
+
+				SDL_Rect r = {
+					.x=static_cast<Sint16>(x), .y=static_cast<Sint16>(y),
+					.w=_capped_w, .h=_capped_h,
+				};
+				_grid_highlights->drawOutline(&r, color);
+				_active_highlights.push_back(r);
+				break;
+			}
+			case INV_SLOT: {
+				int x, y;
+				x = (item->getSlot()->getX() + item->getSlotX() * RuleInventory::SLOT_W);
+				y = (item->getSlot()->getY() + item->getSlotY() * RuleInventory::SLOT_H);
+				Uint16 w = item->getRules()->getInventoryWidth() * RuleInventory::SLOT_W + 1;
+				Uint16 h = item->getRules()->getInventoryHeight() * RuleInventory::SLOT_H + 1;
+
+				SDL_Rect r = {
+					.x=static_cast<Sint16>(x), .y=static_cast<Sint16>(y),
+					.w=w,
+					.h=h,
+				};
+
+				_grid_highlights->drawOutline(&r, color);
+				_active_highlights.push_back(r);
+				break;
+			}
+			case INV_HAND: {
+				int x, y;
+				x = (item->getSlot()->getX() + item->getSlotX() * RuleInventory::SLOT_W);
+				y = (item->getSlot()->getY() + item->getSlotY() * RuleInventory::SLOT_H);
+
+				SDL_Rect r = {
+					.x=static_cast<Sint16>(x), .y=static_cast<Sint16>(y),
+					.w=RuleInventory::HAND_W * RuleInventory::SLOT_W,
+					.h=RuleInventory::HAND_H * RuleInventory::SLOT_W,
+				};
+
+				_grid_highlights->drawOutline(&r, color);
+				_active_highlights.push_back(r);
+				break;
+			}
+			default: {
+				UNREACHABLE();
+			}
+		}
+	};
+
+	const auto handleAmmoHighlight = [&](
+		const BattleItem *const primary_bi,
+		const BattleItem *const inv_ammo_bi) {
+
+		int slot_idx = primary_bi->getRules()->getSlotForAmmo(inv_ammo_bi->getRules());
+		if(slot_idx == -1) return;
+
+		Log(LOG_VERBOSE) << "(Inv) highlight '"
+			<< primary_bi->getRules()->getType()
+			<< "', ammo='" << inv_ammo_bi->getRules()->getType() << "'";
+		const BattleItem *const loaded_ammo_bi = primary_bi->getAmmoForSlot(slot_idx);
+		if(
+			loaded_ammo_bi != nullptr
+			&& inv_ammo_bi->getRules()->getType() == loaded_ammo_bi->getRules()->getType()
+			&& loaded_ammo_bi->getAmmoQuantity() > 0
+		) {
+			// highlight ammo differently if it's a kind already loaded
+			Log(LOG_VERBOSE) << "(Inv) true | " << tag_highlight;
+			doItemHighlight(inv_ammo_bi, tag_highlight);
+		} else {
+			Log(LOG_VERBOSE) << "(Inv) false | " << other_highlight;
+			doItemHighlight(inv_ammo_bi, other_highlight);
+		}
+	};
+
+	const BattleItem *const mouseover_bi = getMouseOverItem();
+	if(mouseover_bi != nullptr) {
+		doItemHighlight(mouseover_bi, primary_highlight);
+		if(_selUnit != nullptr && mouseover_bi->isWeaponWithAmmo()) {
+			Log(LOG_VERBOSE) << "(Inv) finding ammo in inv. to highlight for mouseover";
+			for (const BattleItem *const bi : *_selUnit->getInventory()) {
+				handleAmmoHighlight(mouseover_bi, bi);
+			}
+
+			for (const BattleItem *const bi : *_selUnit->getTile()->getInventory()) {
+				// don't try and highlight if slot is outside of ground-view
+				if(isVisibleGroundItem(bi))
+					handleAmmoHighlight(mouseover_bi, bi);
+			}
+		}
+	}
+
+	_grid_highlights->blit(_grid->getSurface());
+}
+
+inline bool Inventory::isVisibleGroundItem(const BattleItem *const bi) {
+	const int x = (bi->getSlot()->getX() + (bi->getSlotX() - _groundOffset) * RuleInventory::SLOT_W);
+	const int y = (bi->getSlot()->getY() + bi->getSlotY() * RuleInventory::SLOT_H);
+
+	if(x < 0 || y < 0)
+		return false;
+	if(x >= RuleInventory::GROUND_W)
+		return false;
+	if(y >= RuleInventory::GROUND_H)
+		return false;
+
+	return true;
+}
+
+/**
  * Draws the inventory elements.
  */
 void Inventory::draw()
@@ -209,11 +355,14 @@ void Inventory::drawGrid()
 				r.w = RuleInventory::SLOT_W + 1;
 				r.h = RuleInventory::SLOT_H + 1;
 				_grid->drawRect(&r, color);
-				r.x++;
-				r.y++;
-				r.w -= 2;
-				r.h -= 2;
-				_grid->drawRect(&r, 0);
+				{
+					SDL_Rect rfill = r;
+					rfill.x++;
+					rfill.y++;
+					rfill.w -= 2;
+					rfill.h -= 2;
+					_grid->drawRect(&rfill, 0);
+				}
 			}
 		}
 		else if (ruleInv->getType() == INV_HAND)
@@ -224,17 +373,20 @@ void Inventory::drawGrid()
 			r.w = RuleInventory::HAND_W * RuleInventory::SLOT_W;
 			r.h = RuleInventory::HAND_H * RuleInventory::SLOT_H;
 			_grid->drawRect(&r, color);
-			r.x++;
-			r.y++;
-			r.w -= 2;
-			r.h -= 2;
-			_grid->drawRect(&r, 0);
+			{
+				SDL_Rect rfill = r;
+				rfill.x++;
+				rfill.y++;
+				rfill.w -= 2;
+				rfill.h -= 2;
+				_grid->drawRect(&rfill, 0);
+			}
 		}
 		else if (ruleInv->getType() == INV_GROUND)
 		{
-			for (int x = ruleInv->getX(); x <= 320; x += RuleInventory::SLOT_W)
+			for (int x = ruleInv->getX(); x <= RuleInventory::GROUND_W; x += RuleInventory::SLOT_W)
 			{
-				for (int y = ruleInv->getY(); y <= 200; y += RuleInventory::SLOT_H)
+				for (int y = ruleInv->getY(); y <= RuleInventory::GROUND_H; y += RuleInventory::SLOT_H)
 				{
 					SDL_Rect r;
 					r.x = x;
@@ -242,11 +394,14 @@ void Inventory::drawGrid()
 					r.w = RuleInventory::SLOT_W + 1;
 					r.h = RuleInventory::SLOT_H + 1;
 					_grid->drawRect(&r, color);
-					r.x++;
-					r.y++;
-					r.w -= 2;
-					r.h -= 2;
-					_grid->drawRect(&r, 0);
+					{
+						SDL_Rect rfill = r;
+						rfill.x++;
+						rfill.y++;
+						rfill.w -= 2;
+						rfill.h -= 2;
+						_grid->drawRect(&rfill, 0);
+					}
 				}
 			}
 		}
@@ -620,7 +775,19 @@ BattleItem *Inventory::getMouseOverItem() const
  */
 void Inventory::setMouseOverItem(BattleItem *item)
 {
+	const BattleItem *const prev = _mouseOverItem;
 	_mouseOverItem = (item && !(item->getRules()->isFixed() && item->getRules()->getBattleType() == BT_NONE)) ? item : 0;
+	if(prev != _mouseOverItem) {
+		if(_mouseOverItem == nullptr) {
+			Log(LOG_VERBOSE) << "(Inv) cleared mouseOver item";
+		} else {
+			Log(LOG_VERBOSE)
+				<< "(Inv) set mouseOver item "
+				<< "(x=" << item->getSlotX() << ","
+				<< "(y=" << item->getSlotY() << ")";
+		}
+		drawGridHighlights();
+	}
 }
 
 /**

@@ -45,6 +45,7 @@
 #include <algorithm>
 #include "../fallthrough.h"
 #include "../Geoscape/GeoscapeState.h"
+#include "../platform.h"
 
 namespace OpenXcom
 {
@@ -713,7 +714,16 @@ bool Game::isCtrlPressed(bool considerTouchButtons) const
 	{
 		return true;
 	}
+
+#if PLATFORM(DARWIN)
+	// cmd/meta is technically 'ctrl' for macOS
+	//  since macOS allows for rebinding cmd -> ctrl
+	//  it makes more sense to default to cmd/meta, to keep
+	//  alignment with general macOS apps
+	return (SDL_GetModState() & KMOD_META) != 0;
+#else
 	return (SDL_GetModState() & KMOD_CTRL) != 0;
+#endif
 }
 
 /**

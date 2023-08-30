@@ -96,25 +96,37 @@ namespace OpenXcom
  * Initializes all the elements in the Battlescape screen.
  * @param game Pointer to the core game.
  */
-BattlescapeState::BattlescapeState() :
-	_reserve(0), _touchButtonsEnabled(false), _touchButtonsEnabledLastTurn(false), _manaBarVisible(false),
-	_firstInit(true), _paletteResetNeeded(false), _paletteResetRequested(false),
-	_isMouseScrolling(false), _isMouseScrolled(false),
-	_xBeforeMouseScrolling(0), _yBeforeMouseScrolling(0),
-	_totalMouseMoveX(0), _totalMouseMoveY(0), _mouseMovedOverThreshold(0), _mouseOverIcons(false),
-	_autosave(0),
-	_numberOfDirectlyVisibleUnits(0), _numberOfEnemiesTotal(0), _numberOfEnemiesTotalPlusWounded(0)
-{
+BattlescapeState::BattlescapeState()
+	: _reserve(0)
+	, _touchButtonsEnabled(false)
+	, _touchButtonsEnabledLastTurn(false)
+	, _manaBarVisible(false)
+	, _firstInit(true)
+	, _paletteResetNeeded(false)
+	, _paletteResetRequested(false)
+	, _isMouseScrolling(false)
+	, _isMouseScrolled(false)
+	, _xBeforeMouseScrolling(0)
+	, _yBeforeMouseScrolling(0)
+	, _totalMouseMoveX(0)
+	, _totalMouseMoveY(0)
+	, _mouseMovedOverThreshold(0)
+	, _mouseOverIcons(false)
+	, _mouseOverOverlay(false)
+	, _autosave(0)
+	, _numberOfDirectlyVisibleUnits(0)
+	, _numberOfEnemiesTotal(0)
+	, _numberOfEnemiesTotalPlusWounded(0) {
 	_save = _game->getSavedGame()->getSavedBattle();
 
-	std::fill_n(_visibleUnit, 10, (BattleUnit*)(0));
+	std::fill_n(_visibleUnit, 10, (BattleUnit *)(0));
 
 	const int screenWidth = Options::baseXResolution;
 	const int screenHeight = Options::baseYResolution;
 	const int iconsWidth = _game->getMod()->getInterface("battlescape")->getElement("icons")->w;
 	const int iconsHeight = _game->getMod()->getInterface("battlescape")->getElement("icons")->h;
 	const int visibleMapHeight = screenHeight - iconsHeight;
-	const int x = screenWidth/2 - iconsWidth/2;
+	const int x = screenWidth / 2 - iconsWidth / 2;
 	const int y = screenHeight - iconsHeight;
 
 	_indicatorTextColor = _game->getMod()->getInterface("battlescape")->getElement("visibleUnits")->color;
@@ -187,7 +199,7 @@ BattlescapeState::BattlescapeState() :
 	for (int i = 0; i < VISIBLE_MAX; ++i)
 	{
 		_btnVisibleUnit[i] = new InteractiveSurface(15, 12, x + visibleUnitX, y + visibleUnitY - (i * 13));
-		_numVisibleUnit[i] = new NumberText(15, 12, _btnVisibleUnit[i]->getX() + 6 , _btnVisibleUnit[i]->getY() + 4);
+		_numVisibleUnit[i] = new NumberText(15, 12, _btnVisibleUnit[i]->getX() + 6, _btnVisibleUnit[i]->getY() + 4);
 	}
 	_numVisibleUnit[9]->setX(_numVisibleUnit[9]->getX() - 2); // center number 10
 	_warning = new WarningMessage(224, 24, x + 48, y + 32);
@@ -235,7 +247,7 @@ BattlescapeState::BattlescapeState() :
 	_barEnergy = new Bar(102, 3, x + 170, y + 41 + step);
 
 	_numHealth = new NumberText(15, 5, x + 136, y + 50);
-	_barHealth= new Bar(102, 3, x + 170, y + 41 + step*2);
+	_barHealth = new Bar(102, 3, x + 170, y + 41 + step * 2);
 
 	_numMorale = new NumberText(15, 5, x + 154, y + 50);
 	_barMorale = new Bar(102, 3, x + 170, y + 41 + step*3);
@@ -607,13 +619,13 @@ BattlescapeState::BattlescapeState() :
 		}
 	}
 
-	SDLKey buttons[] = {Options::keyBattleCenterEnemy1,
-						Options::keyBattleCenterEnemy2,
-						Options::keyBattleCenterEnemy3,
-						Options::keyBattleCenterEnemy4,
-						Options::keyBattleCenterEnemy5,
-						Options::keyBattleCenterEnemy6,
-						Options::keyBattleCenterEnemy7,
+	SDLKey buttons[] = { Options::keyBattleCenterEnemy1,
+		Options::keyBattleCenterEnemy2,
+		Options::keyBattleCenterEnemy3,
+		Options::keyBattleCenterEnemy4,
+		Options::keyBattleCenterEnemy5,
+		Options::keyBattleCenterEnemy6,
+		Options::keyBattleCenterEnemy7,
 						Options::keyBattleCenterEnemy8,
 						Options::keyBattleCenterEnemy9,
 						Options::keyBattleCenterEnemy10};
@@ -622,16 +634,16 @@ BattlescapeState::BattlescapeState() :
 		std::ostringstream tooltip;
 		_btnVisibleUnit[i]->onMouseClick((ActionHandler)&BattlescapeState::btnVisibleUnitClick);
 		_btnVisibleUnit[i]->onKeyboardPress((ActionHandler)&BattlescapeState::btnVisibleUnitClick, buttons[i]);
-		tooltip << "STR_CENTER_ON_ENEMY_" << (i+1);
+		tooltip << "STR_CENTER_ON_ENEMY_" << (i + 1);
 		_txtVisibleUnitTooltip[i] = tooltip.str();
 		_btnVisibleUnit[i]->setTooltip(_txtVisibleUnitTooltip[i]);
 		_btnVisibleUnit[i]->onMouseIn((ActionHandler)&BattlescapeState::txtTooltipIn);
 		_btnVisibleUnit[i]->onMouseOut((ActionHandler)&BattlescapeState::txtTooltipOut);
 		_numVisibleUnit[i]->setColor(_indicatorTextColor);
-		_numVisibleUnit[i]->setValue(i+1);
+		_numVisibleUnit[i]->setValue(i + 1);
 	}
 	_txtVisibleUnitTooltip[VISIBLE_MAX] = "STR_CENTER_ON_WOUNDED_FRIEND";
-	_txtVisibleUnitTooltip[VISIBLE_MAX+1] = "STR_CENTER_ON_DIZZY_FRIEND";
+	_txtVisibleUnitTooltip[VISIBLE_MAX + 1] = "STR_CENTER_ON_DIZZY_FRIEND";
 
 	_warning->setColor(_game->getMod()->getInterface("battlescape")->getElement("warning")->color2);
 	_warning->setTextColor(_game->getMod()->getInterface("battlescape")->getElement("warning")->color);
@@ -709,17 +721,18 @@ BattlescapeState::BattlescapeState() :
 	_battleGame = new BattlescapeGame(_save, this);
 
 	_barHealthColor = _barHealth->getColor();
-}
 
+	_tac_overlay = new TacOverlay(this);
+}
 
 /**
  * Deletes the battlescapestate.
  */
-BattlescapeState::~BattlescapeState()
-{
+BattlescapeState::~BattlescapeState() {
 	delete _animTimer;
 	delete _gameTimer;
 	delete _battleGame;
+	delete _tac_overlay;
 
 	resetPalettes();
 }
@@ -980,7 +993,8 @@ void BattlescapeState::mapOver(Action *action)
 void BattlescapeState::mapPress(Action *action)
 {
 	// don't handle mouseclicks over the buttons (it overlaps with map surface)
-	if (_mouseOverIcons) return;
+	if (isMouseBeingUsed())
+		return;
 
 	if (action->getDetails()->button.button == Options::battleDragScrollButton)
 	{
@@ -999,6 +1013,19 @@ void BattlescapeState::mapPress(Action *action)
 		_mouseMovedOverThreshold = false;
 		_mouseScrollingStartTime = SDL_GetTicks();
 	}
+}
+
+bool BattlescapeState::isMouseBeingUsed()
+{
+	if(_mouseOverIcons)
+		return true;
+
+	for(auto cb : _mouse_over_callbacks) {
+		if(cb())
+			return true;
+	}
+
+	return false;
 }
 
 /**
@@ -1058,9 +1085,9 @@ void BattlescapeState::mapClick(Action *action)
 		}
 	}
 
-	// don't handle mouseclicks over the buttons (it overlaps with map surface)
-	if (_mouseOverIcons) return;
-
+	// don't handle mouseclicks over interface elements (it overlaps with map surface)
+	if (isMouseBeingUsed())
+		return;
 
 	// don't accept leftclicks if there is no cursor or there is an action busy
 	if (_map->getCursorType() == CT_NONE || _battleGame->isBusy()) return;
@@ -1113,6 +1140,14 @@ void BattlescapeState::mapIn(Action *)
 {
 	_isMouseScrolling = false;
 	_map->setButtonsPressed(Options::battleDragScrollButton, false);
+}
+
+/**
+ * TODO DESC
+ * @return
+ */
+InteractiveSurface *BattlescapeState::getIcons() {
+	return _icons;
 }
 
 /**
@@ -1946,7 +1981,7 @@ void BattlescapeState::drawItem(BattleItem* item, Surface* hand, std::vector<Num
 	}
 	if (drawReactionIndicator)
 	{
- 		if (Surface* reactionIndicator = _game->getMod()->getSurface("reactionIndicator", false))
+		if (Surface* reactionIndicator = _game->getMod()->getSurface("reactionIndicator", false))
 		{
 			reactionIndicator->blitNShade(hand, 0, 0);
 		}
@@ -2424,6 +2459,8 @@ void BattlescapeState::animate()
 	{
 		drawHandsItems();
 	}
+
+	_tac_overlay->animate();
 }
 
 /**
@@ -2747,7 +2784,7 @@ inline void BattlescapeState::handle(Action *action)
 							unit->setTile(_save->getTile(newPos), _save);
 							unit->setPosition(newPos);
 
-							//free refresh as bonus
+							// free refresh as bonus
 							unit->updateUnitStats(true, false);
 							_save->getTileEngine()->calculateLighting(LL_UNITS);
 							_battleGame->handleState();
@@ -3012,7 +3049,7 @@ void BattlescapeState::saveVoxelView()
 	int test;
 	Position originVoxel = _save->getTileEngine()->getSightOriginVoxel(bu);
 
-	Position targetVoxel,hitPos;
+	Position targetVoxel, hitPos;
 	double dist = 0;
 	bool _debug = _save->getDebugMode();
 	double dir = ((double)bu->getDirection()+4)/4*M_PI;
@@ -3068,7 +3105,7 @@ void BattlescapeState::saveVoxelView()
 							}
 						}
 					}
-					hitPos =_trajectory.at(0);
+					hitPos = _trajectory.at(0);
 					dist = Position::distance(hitPos, originVoxel);
 					black = false;
 				}
@@ -3101,8 +3138,8 @@ void BattlescapeState::saveVoxelView()
 			}
 
 			image.push_back((int)((double)(pal[test*3+0])*dist));
-			image.push_back((int)((double)(pal[test*3+1])*dist));
-			image.push_back((int)((double)(pal[test*3+2])*dist));
+			image.push_back((int)((double)(pal[test * 3 + 1]) * dist));
+			image.push_back((int)((double)(pal[test * 3 + 2]) * dist));
 		}
 	}
 
@@ -3177,9 +3214,9 @@ void BattlescapeState::saveVoxelMap()
 					}
 				}
 
-				image.push_back((int)((float)pal[test*3+0]*dist));
-				image.push_back((int)((float)pal[test*3+1]*dist));
-				image.push_back((int)((float)pal[test*3+2]*dist));
+				image.push_back((int)((float)pal[test * 3 + 0] * dist));
+				image.push_back((int)((float)pal[test * 3 + 1] * dist));
+				image.push_back((int)((float)pal[test * 3 + 2] * dist));
 			}
 		}
 

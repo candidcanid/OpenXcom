@@ -18,6 +18,7 @@
  * along with OpenXcom.  If not, see <http:///www.gnu.org/licenses/>.
  */
 #include "../Engine/State.h"
+#include "TacOverlay.h"
 #include "Position.h"
 
 #include <vector>
@@ -93,12 +94,18 @@ private:
 	int _totalMouseMoveX, _totalMouseMoveY;
 	bool _mouseMovedOverThreshold;
 	bool _mouseOverIcons;
+	bool _mouseOverOverlay = false;
 	std::string _currentTooltip;
 	Position _cursorPosition;
 	Uint8 _barHealthColor;
 	int _autosave;
 	int _numberOfDirectlyVisibleUnits, _numberOfEnemiesTotal, _numberOfEnemiesTotalPlusWounded;
 	Uint8 _indicatorTextColor, _indicatorGreen, _indicatorBlue, _indicatorPurple;
+
+	TacOverlay *_tac_overlay;
+    /// TODO: desc
+    std::vector<std::function<bool()>> _mouse_over_callbacks;
+
 	/// Popups a context sensitive list of actions the user can choose from.
 	void handleItemClick(BattleItem *item, bool rightClick);
 	/// Shifts the red colors of the visible unit buttons backgrounds.
@@ -112,6 +119,12 @@ private:
 	/// Shows the unit kneel state.
 	void toggleKneelButton(BattleUnit* unit);
 public:
+    /// TODO: desc
+    void addUsingMouseCallback(std::function<bool()> cb) {
+        _mouse_over_callbacks.push_back(cb);
+    }
+    /// TODO: desc
+    bool isMouseBeingUsed();
 	/// Selects the next soldier.
 	void selectNextPlayerUnit(bool checkReselect = false, bool setReselect = false, bool checkInventory = false, bool checkFOV = true);
 	/// Selects the previous soldier.
@@ -288,9 +301,9 @@ public:
 	void autosave(int currentTurn);
 	/// Is busy?
 	bool isBusy() const;
-	
 	/// Handler for clicking the AI button.
 	void btnAIClick(Action *action);
+    InteractiveSurface *getIcons();
 };
 
 }

@@ -43,6 +43,7 @@ private:
 	int _visibleMapHeight;
 	bool _showAllLayers;
 	Map *_map;
+	bool _mouseWheelDisabled;
 public:
 	static const int SCROLL_BORDER = 5;
 	static const int SCROLL_DIAGONAL_EDGE = 60;
@@ -50,6 +51,9 @@ public:
 	Camera(int spriteWidth, int spriteHeight, int mapsize_x, int mapsize_y, int mapsize_z, Map *map, int visibleMapHeight);
 	/// Cleans up the camera.
 	~Camera();
+	/// TODO: desc
+	void disableMouseWheel();
+	void enableMouseWheel();
 	/// Sets the camera's scroll timers.
 	void setScrollTimer(Timer *mouse, Timer *key);
 	/// Special handling for mouse press.

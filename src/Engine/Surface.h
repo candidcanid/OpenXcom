@@ -151,6 +151,8 @@ public:
 	void drawRect(SDL_Rect *rect, Uint8 color);
 	/// Draws a filled rectangle on the surface.
 	void drawRect(Sint16 x, Sint16 y, Sint16 w, Sint16 h, Uint8 color);
+	/// Draws a non-filled rectangle (i.e. an outline) on the surface.
+	void drawOutline(SDL_Rect *rect, Uint8 color);
 	/// Draws a line on the surface.
 	void drawLine(Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 color);
 	/// Draws a filled circle on the surface.

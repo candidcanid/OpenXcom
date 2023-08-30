@@ -2032,6 +2032,12 @@ interfaces:
       - id: numStack
         color: 66
         color2: 32
+      - id: highlightPrimary
+        color: 17 # orange
+      - id: highlightTag
+        color: 48 # mint
+      - id: highlightOther
+        color: 23 # blue-grey
   - type: stats
     elements:
       - id: textName
