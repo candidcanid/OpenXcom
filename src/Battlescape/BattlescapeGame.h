@@ -17,11 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http:///www.gnu.org/licenses/>.
  */
-#include "Position.h"
+#include "../Engine/InteractiveSurface.h"
 #include "../Mod/RuleItem.h"
 #include "Pathfinding.h"
-#include <string>
+#include "Position.h"
 #include <list>
+#include <string>
 #include <vector>
 
 namespace OpenXcom
@@ -324,6 +325,7 @@ public:
 	void setNextUnitToSelect(BattleUnit *unit);
 	/// Returns which unit the AI wanted to select next
 	BattleUnit *getNextUnitToSelect();
+    OpenXcom::InteractiveSurface *getIcons();
 };
 
 }

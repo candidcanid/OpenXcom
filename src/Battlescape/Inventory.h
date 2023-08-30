@@ -62,6 +62,9 @@ private:
 	RuleInventory *_inventorySlotBelt = nullptr;
 	RuleInventory *_inventorySlotGround = nullptr;
 
+	Surface *_grid_highlights;
+	std::vector<SDL_Rect> _active_highlights;
+
 	/// Clear all occupied slots markers.
 	std::vector<std::vector<char>>* clearOccupiedSlotsCache();
 	/// Moves an item to a specified slot.
@@ -70,6 +73,8 @@ private:
 	RuleInventory *getSlotInPosition(int *x, int *y) const;
 	/// Play a sound.
 	void playSound(int sound);
+	/// checks if given BattleItem is currently visible in inventory
+	inline bool isVisibleGroundItem(const BattleItem *const bi);
 public:
 	/// Creates a new inventory view at the specified position and size.
 	Inventory(Game *game, int width, int height, int x = 0, int y = 0, bool base = false);
@@ -87,6 +92,8 @@ public:
 	void draw() override;
 	/// Draws the inventory grid.
 	void drawGrid();
+	/// Draws inventory grid highlights.
+	void drawGridHighlights();
 	/// Draws the inventory grid labels.
 	void drawGridLabels(bool showTuCost = false);
 	/// Draws the inventory items.
@@ -111,6 +118,8 @@ public:
 	void mouseOver(Action *action, State *state) override;
 	/// Special handling for mouse clicks.
 	void mouseClick(Action *action, State *state) override;
+	/// TODO: mouseAction desc
+	bool handleMouseAction(Action *action, State *state);
 	/// Unloads the selected weapon.
 	bool unload(bool quickUnload = false);
 	/// Checks whether the given item is visible with the current search string.

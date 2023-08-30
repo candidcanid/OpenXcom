@@ -21,6 +21,7 @@
 #include "InventorySaveState.h"
 #include "InventoryPersonalState.h"
 #include <algorithm>
+#include <sstream>
 #include "Inventory.h"
 #include "../Basescape/SoldierArmorState.h"
 #include "../Basescape/SoldierAvatarState.h"
@@ -111,9 +112,11 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base, bo
 	_txtTus = new Text(40, 9, 245, 24);
 	_txtWeight = new Text(70, 9, 245, 24);
 	_txtStatLine1 = new Text(70, 9, 245, 32);
-	_txtStatLine2 = new Text(70, 9, 245, 40);
-	_txtStatLine3 = new Text(70, 9, 245, 48);
-	_txtStatLine4 = new Text(70, 9, 245, 56);
+	_txtStatLine2 = new Text(70, 9, 245, 32 + (8 * 1));
+	_txtStatLine3 = new Text(70, 9, 245, 32 + (8 * 2));
+	_txtStatLine4 = new Text(70, 9, 245, 32 + (8 * 3));
+	_txtStatLine5 = new Text(70, 9, 245, 32 + (8 * 4));
+	_txtStatLine6 = new Text(70, 9, 245, 32 + (8 * 5));
 	_txtItem = new Text(160, 9, 128, 140);
 	_txtAmmo = new Text(66, 24, 254, 64);
 	_btnOk = new BattlescapeButton(35, 22, 237, 1);
@@ -156,6 +159,8 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base, bo
 	add(_txtStatLine2, "textStatLine2", "inventory", _bg);
 	add(_txtStatLine3, "textStatLine3", "inventory", _bg);
 	add(_txtStatLine4, "textStatLine4", "inventory", _bg);
+    add(_txtStatLine5);
+    add(_txtStatLine6);
 	add(_txtItem, "textItem", "inventory", _bg);
 	add(_txtAmmo, "textAmmo", "inventory", _bg);
 	add(_btnOk, "buttonOK", "inventory", _bg);
@@ -196,6 +201,9 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base, bo
 	_txtStatLine3->setHighContrast(true);
 
 	_txtStatLine4->setHighContrast(true);
+
+    _txtStatLine5->setHighContrast(true);
+    _txtStatLine6->setHighContrast(true);
 
 	_txtItem->setHighContrast(true);
 
@@ -325,6 +333,8 @@ InventoryState::InventoryState(bool tu, BattlescapeState *parent, Base *base, bo
 	_txtStatLine2->setVisible(Options::showMoreStatsInInventoryView && !_tu);
 	_txtStatLine3->setVisible(Options::showMoreStatsInInventoryView && !_tu);
 	_txtStatLine4->setVisible(Options::showMoreStatsInInventoryView && !_tu);
+    _txtStatLine5->setVisible(Options::showMoreStatsInInventoryView && !_tu);
+    _txtStatLine6->setVisible(Options::showMoreStatsInInventoryView && !_tu);
 }
 
 static void _clearInventoryTemplate(std::vector<EquipmentLayoutItem*> &inventoryTemplate)
@@ -682,6 +692,25 @@ void InventoryState::updateStats()
 	updateStatLine(_txtStatLine2, "textStatLine2");
 	updateStatLine(_txtStatLine3, "textStatLine3");
 	updateStatLine(_txtStatLine4, "textStatLine4");
+	// TODO: hook this into logic already used by 'updateStatLine'
+	{
+        auto *geo = unit->getGeoscapeSoldier();
+        if(geo != nullptr) {
+            std::ostringstream stream;
+            stream << "Kills>";
+            stream << unit->getGeoscapeSoldier()->getKills();
+            _txtStatLine5->setText(stream.str());
+        }
+	}
+    {
+        auto *geo = unit->getGeoscapeSoldier();
+        if(geo != nullptr) {
+            std::ostringstream stream;
+            stream << "Missions>";
+            stream << unit->getGeoscapeSoldier()->getMissions();
+            _txtStatLine6->setText(stream.str());
+        }
+	}
 }
 
 /**

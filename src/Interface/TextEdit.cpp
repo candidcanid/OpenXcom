@@ -23,9 +23,13 @@
 #include "../Engine/Timer.h"
 #include "../Engine/Options.h"
 #include "../fallthrough.h"
+#include "../platform.h"
 
 namespace OpenXcom
 {
+
+bool _isCtrlPressed();
+bool _isAltPressed();
 
 /**
  * Sets up a blank text edit with the specified size and position.
@@ -459,6 +463,21 @@ void TextEdit::mousePress(Action *action, State *state)
 	InteractiveSurface::mousePress(action, state);
 }
 
+// TODO: clumsy, but no way to use existing
+//  isCtrlPressed?
+bool _isCtrlPressed() {
+	#if PLATFORM(DARWIN)
+		return (SDL_GetModState() & KMOD_META) != 0;
+	#else
+		return (SDL_GetModState() & KMOD_CTRL) != 0;
+	#endif
+}
+
+bool _isAltPressed() {
+	return (SDL_GetModState() & KMOD_ALT) != 0;
+}
+
+
 /**
  * Changes the text edit according to keyboard input, and
  * unfocuses the text if Enter is pressed.
@@ -507,15 +526,35 @@ void TextEdit::keyboardPress(Action *action, State *state)
 		switch (action->getDetails()->key.keysym.sym)
 		{
 		case SDLK_LEFT:
-			if (_caretPos > 0)
-			{
+			if(_isCtrlPressed()) {
+				_caretPos = 0;
+			} else if (_caretPos > 0) {
 				_caretPos--;
+				if(_isAltPressed()) {
+					while(_caretPos > 0 && !OpenXcom::Unicode::isSpace(_value[_caretPos])) {
+						_caretPos--;
+					}
+					while(_caretPos > 0 && OpenXcom::Unicode::isSpace(_value[_caretPos])) {
+						_caretPos--;
+					}
+				}
 			}
 			break;
 		case SDLK_RIGHT:
-			if (_caretPos < _value.length())
+			if(_isCtrlPressed()) {
+				_caretPos = _value.length() - 1;
+			}
+			else if (_caretPos < _value.length())
 			{
 				_caretPos++;
+				if(_isAltPressed()) {
+					while(_caretPos < _value.length() && !OpenXcom::Unicode::isSpace(_value[_caretPos])) {
+						_caretPos++;
+					}
+					while(_caretPos < _value.length() && OpenXcom::Unicode::isSpace(_value[_caretPos])) {
+						_caretPos++;
+					}
+				}
 			}
 			break;
 		case SDLK_HOME:
@@ -525,10 +564,17 @@ void TextEdit::keyboardPress(Action *action, State *state)
 			_caretPos = _value.length();
 			break;
 		case SDLK_BACKSPACE:
-			if (_caretPos > 0)
-			{
-				_value.erase(_caretPos - 1, 1);
-				_caretPos--;
+			if(_isCtrlPressed()) {
+				while(_caretPos > 0) {
+					_value.erase(_caretPos - 1, 1);
+					_caretPos--;
+				}
+			} else {
+				if (_caretPos > 0)
+				{
+					_value.erase(_caretPos - 1, 1);
+					_caretPos--;
+				}
 			}
 			break;
 		case SDLK_DELETE:

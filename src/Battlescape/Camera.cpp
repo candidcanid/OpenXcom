@@ -37,7 +37,7 @@ namespace OpenXcom
  * @param visibleMapHeight Current height the view is at.
  */
 Camera::Camera(int spriteWidth, int spriteHeight, int mapsize_x, int mapsize_y, int mapsize_z, Map *map, int visibleMapHeight) : _scrollMouseTimer(0), _scrollKeyTimer(0), _spriteWidth(spriteWidth), _spriteHeight(spriteHeight), _mapsize_x(mapsize_x), _mapsize_y(mapsize_y), _mapsize_z(mapsize_z), _screenWidth(map->getWidth()), _screenHeight(map->getHeight()),
-																																 _mapOffset(-250,250,0), _scrollMouseX(0), _scrollMouseY(0), _scrollKeyX(0), _scrollKeyY(0), _scrollTrigger(false), _visibleMapHeight(visibleMapHeight), _showAllLayers(false), _map(map)
+																																 _mapOffset(-250,250,0), _scrollMouseX(0), _scrollMouseY(0), _scrollKeyX(0), _scrollKeyY(0), _scrollTrigger(false), _visibleMapHeight(visibleMapHeight), _showAllLayers(false), _map(map), _mouseWheelDisabled(false)
 {
 }
 
@@ -60,6 +60,15 @@ void Camera::setScrollTimer(Timer *mouse, Timer *key)
 	_scrollKeyTimer = key;
 }
 
+// TODO: desc
+void Camera::disableMouseWheel() {
+	_mouseWheelDisabled = true;
+}
+
+void Camera::enableMouseWheel() {
+	_mouseWheelDisabled = false;
+}
+
 /**
  * Handles camera mouse shortcuts.
  * @param action Pointer to an action.
@@ -72,7 +81,7 @@ void Camera::mousePress(Action *action, State *)
 		_scrollTrigger = true;
 		mouseOver(action, 0);
 	}
-	else if (Options::battleDragScrollButton != SDL_BUTTON_MIDDLE || (SDL_GetMouseState(0,0)&SDL_BUTTON(Options::battleDragScrollButton)) == 0)
+	else if (!_mouseWheelDisabled && (Options::battleDragScrollButton != SDL_BUTTON_MIDDLE || (SDL_GetMouseState(0,0)&SDL_BUTTON(Options::battleDragScrollButton)) == 0))
 	{
 		if (action->getDetails()->button.button == SDL_BUTTON_WHEELUP)
 		{
