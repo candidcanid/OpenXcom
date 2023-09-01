@@ -88,6 +88,7 @@
 #include "../Mod/RuleVideo.h"
 #include <algorithm>
 #include "../Basescape/SoldiersAIState.h"
+#include "MapEditor.h"
 
 namespace OpenXcom
 {
@@ -2792,23 +2793,7 @@ inline void BattlescapeState::handle(Action *action)
 						}
 					}
 				}
-				else if (_editor && key == SDLK_z && ctrlPressed)
-				{
-					if (shiftPressed)
-					{
-						_editor->redo();
-					}
-					else
-					{
-						_editor->undo();
-					}
 
-					_map->draw();
-
-					std::ostringstream ss;
-					ss << _editor->getEditRegisterPosition() << "/" << _editor->getEditRegisterSize();
-					_txtEditRegister->setText(ss.str().c_str());
-				}
 				if (key == SDLK_a && ctrlPressed)
 				{
 					if (Options::autoCombat)

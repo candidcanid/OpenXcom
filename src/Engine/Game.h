@@ -160,7 +160,6 @@ public:
 	bool getRMBFlag() const { return _rmb; }
 	/// Gets the _mmb flag.
 	bool getMMBFlag() const { return _mmb; }
-	bool isShiftPressed() const;
 
 	/// Sets the map editor for the game
 	void setMapEditor(MapEditor *mapEditor);

@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <MacTypes.h>
 #include <math.h>
 #include "Map.h"
 #include "Camera.h"
@@ -2163,8 +2164,8 @@ void Map::drawForMapEditor(Surface *surface, bool beforeTerrain)
 					float ss = sin(angle);
 
 					// rotate points of a triangle to face the node and shift them to the position of the node
-					Sint16 arrowX[3] = {-offset, -(offset + length), -(offset + length)};
-					Sint16 arrowY[3] = {0, width, -width};
+					Sint16 arrowX[3] = {static_cast<SInt16>(-offset), static_cast<SInt16>(-(offset + length)), static_cast<SInt16>(-(offset + length))};
+					Sint16 arrowY[3] = {0, static_cast<SInt16>(width), static_cast<SInt16>(-width)};
 					Sint16 arrayX[3];
 					Sint16 arrayY[3];
 					for (int j = 0; j < 3; ++j)
@@ -2364,8 +2365,8 @@ void Map::drawForMapEditor(Surface *surface, bool beforeTerrain)
 		float ss = sin(angle);
 
 		// rotate points of a triangle to face the node and shift them to the position of the node
-		Sint16 arrowX[3] = {-offset, -(offset + length), -(offset + length)};
-		Sint16 arrowY[3] = {0, width, -width};
+		Sint16 arrowX[3] = {static_cast<SInt16>(-offset), static_cast<SInt16>(-(offset + length)), static_cast<SInt16>(-(offset + length))};
+		Sint16 arrowY[3] = {0, static_cast<SInt16>(width), static_cast<SInt16>(-width)};
 		Sint16 arrayX[3];
 		Sint16 arrayY[3];
 		for (int j = 0; j < 3; ++j)

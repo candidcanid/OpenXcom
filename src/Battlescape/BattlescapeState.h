@@ -41,6 +41,7 @@ class BattleItem;
 class Timer;
 class WarningMessage;
 class BattlescapeGame;
+class MapEditor;
 
 /**
  * Battlescape screen which shows the tactical battle.
@@ -105,6 +106,7 @@ private:
 	TacOverlay *_tac_overlay;
     /// TODO: desc
     std::vector<std::function<bool()>> _mouse_over_callbacks;
+	MapEditor *_editor;
 
 	/// Popups a context sensitive list of actions the user can choose from.
 	void handleItemClick(BattleItem *item, bool rightClick);
