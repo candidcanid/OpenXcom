@@ -84,4 +84,7 @@ bin/user
 /*.kdev4
 bin/Win32/stderr.txt
 /makefile
+#Ignore CLion project directory(s)
+.idea
+cmake-build-*
 --------------
