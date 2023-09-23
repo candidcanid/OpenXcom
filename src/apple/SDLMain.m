@@ -327,9 +327,9 @@ static void CustomApplicationMain (__unused int argc, __unused char **argv)
 @end
 
 
-#ifdef main
-#  undef main
-#endif
+// #ifdef main
+// #  undef main
+// #endif
 
 
 static int IsRootCwd()
@@ -354,8 +354,20 @@ static int IsFinderLaunch(const int argc, char **argv)
     return 0;  /* not a Finder launch. */
 }
 
+#ifdef __cplusplus
+extern "C" {  // only need to export C interface if
+              // used by C++ source code
+#endif
+
+extern int _SDL_entry(int argc, char **argv);
+
+#ifdef __cplusplus
+}
+#endif
+
+
 /* Main entry point to executable - should *not* be SDL_main! */
-int main (int argc, char **argv)
+int _SDL_entry (int argc, char **argv)
 {
     /* Copy the arguments into a global variable */
     if (IsFinderLaunch(argc, argv)) {

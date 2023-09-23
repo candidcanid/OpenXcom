@@ -22,7 +22,11 @@
 namespace OpenXcom
 {
 
-const SDLKey InteractiveSurface::SDLK_ANY = (SDLKey)-1; // using an unused keycode to represent an "any key"
+// FIXME: casting integer values to outside of an enum is undefined behaviour
+//  for strict santizers - this will crash as (0xffffffff > 0x1ff)
+// const SDLKey InteractiveSurface::SDLK_ANY = (SDLKey)-1; // using an unused keycode to represent an "any key"
+// this isn't an ideal patchup, but will get past a santizer that checks for 0x0 - 0x1ff
+const SDLKey InteractiveSurface::SDLK_ANY = (SDLKey)((int)SDLK_LAST+1); // using an unused keycode to represent an "any key"
 
 /**
  * Sets up a blank interactive surface with the specified size and position.
